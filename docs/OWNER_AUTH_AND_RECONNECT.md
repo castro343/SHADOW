@@ -36,3 +36,15 @@ The default retry schedule starts at 1 second and doubles up to 30 seconds. Test
 - Verify the exact Baileys disconnect status behavior against the pinned package at runtime.
 - Exercise reconnect and logout handling against a disposable test account only after explicit authorization.
 - Keep the safe `index.js` startup guard until owner control, Atlas integration, runtime dependency validation, and sender/group-admin identity checks are complete.
+
+## Running the local pairing utility
+
+The repository includes `scripts/request-pairing-code.js`, exposed as `npm run pair`. It is deliberately a local command rather than a public web endpoint.
+
+1. Configure all MongoDB and encryption settings in a private `config.env` or environment manager.
+2. Generate `SHADOW_PAIRING_TOKEN` as a private random secret of at least 32 bytes.
+3. Supply `SHADOW_PAIRING_REQUEST_TOKEN` independently for the local invocation. Do not store either token in Git or send them in WhatsApp.
+4. Run `npm run pair -- 2547XXXXXXXX` with the target number in international digits-only format.
+5. The utility waits for the Baileys connection to open before requesting the pairing code, then closes the transport.
+
+The pairing utility has not yet been tested with a live WhatsApp account. Use only a disposable test session and a dedicated test database after the dependency API check passes. Never point it at another bot's session database.
