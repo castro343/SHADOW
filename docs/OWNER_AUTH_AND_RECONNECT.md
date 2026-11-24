@@ -45,6 +45,6 @@ The repository includes `scripts/request-pairing-code.js`, exposed as `npm run p
 2. Generate `SHADOW_PAIRING_TOKEN` as a private random secret of at least 32 bytes.
 3. Supply `SHADOW_PAIRING_REQUEST_TOKEN` independently for the local invocation. Do not store either token in Git or send them in WhatsApp.
 4. Run `npm run pair -- 2547XXXXXXXX` with the target number in international digits-only format.
-5. The utility waits for the Baileys connection to open before requesting the pairing code, then closes the transport.
+5. The utility waits for the Baileys connection to open before requesting the pairing code, then keeps the socket open until the session reports registered credentials, then closes the transport. A timeout prevents an abandoned pairing request from running indefinitely.
 
 The pairing utility has not yet been tested with a live WhatsApp account. Use only a disposable test session and a dedicated test database after the dependency API check passes. Never point it at another bot's session database.
