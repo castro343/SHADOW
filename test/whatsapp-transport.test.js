@@ -42,7 +42,8 @@ function createBaileysMock() {
   const socket = {
     ev,
     end() { ev.emit('close'); },
-    async requestPairingCode(number) { return 'TEST-CODE-' + number.slice(-2); }
+    async requestPairingCode(number) { return 'TEST-CODE-' + number.slice(-2); },
+    async sendMessage(...args) { this.sentMessages = this.sentMessages || []; this.sentMessages.push(args); }
   };
   const calls = [];
   const creds = { registered: false };
@@ -144,6 +145,10 @@ test('does not expose QR contents in connection callbacks and deduplicates messa
   assert.deepEqual(updates, [{ connection: 'open', hasQr: true, isNewLogin: false, receivedPendingNotifications: false, lastDisconnectStatusCode: null }]);
   assert.equal(messages.length, 1);
   assert.equal(messages[0].message.conversation, 'hello');
+  await messages[0].sendText('SHADOW reply');
+  assert.equal(baileys.socket.sentMessages[0][0], '12345@s.whatsapp.net');
+  assert.equal(baileys.socket.sentMessages[0][1].text, 'SHADOW reply');
+  assert.equal(baileys.socket.sentMessages[0][2].quoted, msg);
   await transport.close();
 });
 
