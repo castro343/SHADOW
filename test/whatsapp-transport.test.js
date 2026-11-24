@@ -74,6 +74,7 @@ test('creates a transport with secure socket defaults and no QR output', async (
   const transport = await createWhatsAppTransport({
     env,
     MongoClient: mongo.FakeMongoClient,
+    logger: {},
     baileys: baileys.baileys,
     authorizePairing: async actor => actor === 'owner'
   });
@@ -92,6 +93,7 @@ test('pairing requires owner authorization and an unregistered auth state', asyn
   const transport = await createWhatsAppTransport({
     env,
     MongoClient: mongo.FakeMongoClient,
+    logger: {},
     baileys: baileys.baileys,
     authorizePairing: async actor => actor === 'owner'
   });
@@ -122,6 +124,7 @@ test('does not expose QR contents in connection callbacks and deduplicates messa
   const transport = await createWhatsAppTransport({
     env,
     MongoClient: mongo.FakeMongoClient,
+    logger: {},
     baileys: baileys.baileys,
     authorizePairing: async () => false,
     onConnectionUpdate: update => updates.push(update),
@@ -151,6 +154,7 @@ test('closes MongoDB if socket creation fails', async () => {
   await assert.rejects(() => createWhatsAppTransport({
     env,
     MongoClient: mongo.FakeMongoClient,
+    logger: {},
     baileys: brokenBaileys
   }), /socket failed/);
   assert.equal(mongo.wasClosed(), true);
