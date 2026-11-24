@@ -1,7 +1,7 @@
 /**
- * • Bhai itni mehnat khud ka bot banane par lagate to acha tha
- * • Yahan copy paste ka kuch nahi milne wala
- * • Powered by ADEEL-XTECH
+ * SHADOW — WhatsApp Multi-Device Bot
+ * Maintained and customized by CASTRO.
+ * Original command runtime retained under the upstream Apache-2.0 license.
  */
  
  
