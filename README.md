@@ -1,147 +1,72 @@
-<h1 align="center">
-  <img src="https://files.catbox.moe/8pfh7i.jpg" alt="𝐀𝐃𝐄𝐄𝐋-𝐌𝐃" width="800" style="border-radius:25px;box-shadow:0 0 40px #C8860A;"/>
-</h1>
+> [!CAUTION]
+> **Live operation is not yet verified.** The old remote-code bootstrapper has been removed. The current entrypoint runs only the reviewed SHADOW transport, reconnect supervisor, and minimal core plugin. Do not point it at another bot's database or session.
 
-<a><img src='https://i.imgur.com/LyHic3i.gif'/></a>
+# 𝐒𝐇𝐀𝐃𝐎𝐖
 
-<!-- BADGES -->
-<p align="center">
-  <a href="https://github.com/Adeel-Xtech/ADEEL-MD/stargazers/"><img title="Stars" src="https://img.shields.io/github/stars/Adeel-Xtech/ADEEL-MD?color=F5A623&style=flat-square&logo=github&cacheSeconds=3600"/></a>
-  <a href="https://github.com/Adeel-Xtech/ADEEL-MD/network/members"><img title="Forks" src="https://img.shields.io/github/forks/Adeel-Xtech/ADEEL-MD?color=C8860A&style=flat-square&logo=github&cacheSeconds=3600"/></a>
-  <a href="https://github.com/Adeel-Xtech/ADEEL-MD/"><img title="Size" src="https://img.shields.io/github/repo-size/Adeel-Xtech/ADEEL-MD?style=flat-square&color=8B4513&cacheSeconds=3600"/></a>
-  <a href="https://github.com/Adeel-Xtech/ADEEL-MD/graphs/commit-activity"><img height="20" src="https://img.shields.io/badge/Maintained%3F-yes-F5A623.svg"/></a>
-</p>
+**A security-first WhatsApp Multi-Device bot — built and customized by CASTRO.**
 
-<a><img src='https://i.imgur.com/LyHic3i.gif'/></a>
+SHADOW is rebuilt from tracked, reviewable source. The inherited remote bootstrapper, destructive Heroku controls, SMS-bombing features, third-party pairing relay, and unrestricted remote plugin loading are excluded.
 
-<!-- DEVELOPER NAME -->
-<p align="center">
-  <a href="https://github.com/Adeel-Xtech" target="_blank">
-    <img src="https://img.shields.io/badge/👨‍💻_DEVELOPER-ADEEL_XTECH-F5A623?style=for-the-badge&logoColor=black&labelColor=1a1100"/>
-  </a>
-</p>
+## Current runtime
 
-<a><img src='https://i.imgur.com/LyHic3i.gif'/></a>
+- Node.js 24+ entrypoint wired to encrypted MongoDB auth-state transport.
+- Bounded reconnect supervisor with stop-on-logout behavior.
+- Explicit local plugin allowlist; only the reviewed core plugin is enabled.
+- .ping, .menu, and .help are the only enabled commands.
+- Inbound replies use a narrow transport callback; plugins never receive the raw WhatsApp socket.
+- Group-admin commands remain disabled until trusted group metadata verification is implemented.
+- No live WhatsApp connection, pairing, Atlas persistence, or Render deployment has been verified yet.
 
-<!-- VIEWS COUNTER -->
-<p align="center">
-  <img src="https://komarev.com/ghpvc/?username=ADEEL-MD&label=TOTAL+VIEWS&style=for-the-badge&color=F5A623&labelColor=1a1100"/>
-</p>
+## Development checks
 
-<a><img src='https://i.imgur.com/LyHic3i.gif'/></a>
+Install Node.js 24 or newer, then run:
 
-<!-- CHANNEL UPDATE -->
-<p align="center">
-  <a href="https://whatsapp.com/channel/0029VbBmz4V5vKAIaWfYPT0C" target="_blank">
-    <img src="https://img.shields.io/badge/🔔_BOT_UPDATES-JOIN_CHANNEL_NOW-F5A623?style=for-the-badge&logo=whatsapp&logoColor=black&labelColor=1a1100"/>
-  </a>
-</p>
+    npm test
 
-<a><img src='https://i.imgur.com/LyHic3i.gif'/></a>
+GitHub Actions checks unit tests and required exports from pinned Baileys and MongoDB packages.
 
----
+## Private runtime configuration
 
-## 🔐 GET PAIR CODE
+Set these values in a private config.env file or your hosting provider's secret manager. Never commit secrets.
 
-<p align="center">
-  <a href="https://adeel-md-pair-1-50618ddd4ae2.herokuapp.com/" target="_blank">
-    <img src="https://img.shields.io/badge/🔑_GET_PAIR_CODE-CLICK_HERE-F5A623?style=for-the-badge&logoColor=black&labelColor=1a1100" width="300"/>
-  </a>
-</p>
+| Variable | Purpose |
+| --- | --- |
+| MONGODB_URI | Connection string for the SHADOW database |
+| MONGODB_DATABASE | Database dedicated to SHADOW |
+| MONGODB_COLLECTION | Auth-state collection (default: shadow_auth_state) |
+| SHADOW_SESSION_ID | Isolated SHADOW session identifier |
+| SHADOW_SESSION_ENCRYPTION_KEY | 32-byte AES key, encoded as hex or base64 |
+| OWNER_NUMBER | Owner's international phone number, digits only |
+| SHADOW_PAIRING_TOKEN | Owner authorization secret, at least 32 random bytes |
+| SHADOW_PAIRING_REQUEST_TOKEN | Separate local pairing invocation token |
 
-<p align="center"><b>Enter your number with country code — Example: <code>923001234567</code></b></p>
+Generate independent random secrets in a trusted shell:
 
-<a><img src='https://i.imgur.com/LyHic3i.gif'/></a>
+    node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"
 
----
+Do not reuse the encryption key as either pairing token. Do not paste secrets into chat, WhatsApp, screenshots, or source control.
 
-## 🚀 DEPLOYMENT
+## First-time pairing
 
-<div align="center">
-  <table>
-    <tr>
-      <td align="center" style="padding:15px;">
-        <a href="https://dashboard.heroku.com/new?template=https://github.com/Adeel-Xtech/ADEEL-MD" target="_blank">
-          <img src="https://img.shields.io/badge/HEROKU-DEPLOY NOW-F5A623?style=for-the-badge&logo=heroku&logoColor=black&labelColor=1a1100" width="220" height="55"/>
-        </a>
-      </td>
-      <td align="center" style="padding:15px;">
-        <a href="https://adeel-md-vps.vercel.app/" target="_blank">
-          <img src="https://img.shields.io/badge/VPS-DEPLOY NOW-C8860A?style=for-the-badge&logo=virtualbox&logoColor=black&labelColor=1a1100" width="220" height="55"/>
-        </a>
-      </td>
-    </tr>
-  </table>
-</div>
+1. Configure a database and collection that belong exclusively to SHADOW. Do not reuse another bot's session database.
+2. Configure the private environment variables above.
+3. Run the local pairing utility with the phone number you own or are authorized to connect:
 
-<a><img src='https://i.imgur.com/LyHic3i.gif'/></a>
+    npm run pair -- 2547XXXXXXXX
 
----
+4. Enter the one-time code in WhatsApp's Linked devices flow and keep the process running until it confirms registration was saved.
+5. Start SHADOW with npm start.
 
-## ⭐ FORK & STAR
+The pairing utility is local-only; it does not expose a public HTTP endpoint. It has not yet been tested against a live WhatsApp account.
 
-<p align="center">
-  <a href="https://github.com/Adeel-Xtech/ADEEL-MD/fork" target="_blank">
-    <img src="https://img.shields.io/badge/FORK-ADEEL%20MD-BOT?color=F5A623&style=for-the-badge&logo=stackshare&labelColor=1a1100"/>
-  </a>
-  &nbsp;&nbsp;
-  <a href="https://github.com/Adeel-Xtech/ADEEL-MD" target="_blank">
-    <img src="https://img.shields.io/badge/⭐_STAR-THIS_REPO-C8860A?style=for-the-badge&logoColor=black&labelColor=1a1100"/>
-  </a>
-</p>
+## Deployment
 
-<a><img src='https://i.imgur.com/LyHic3i.gif'/></a>
+Render deployment is not yet approved. Before deployment, verify Atlas connectivity, first-time pairing, credential persistence, restart recovery, and live reconnect behavior with the actual SHADOW-owned database and authorized account. Do not deploy with missing environment values or a borrowed session.
 
----
+## Upstream attribution
 
-## 📺 YOUTUBE
+SHADOW is based on the Apache-2.0-licensed ADEEL-MD project. The upstream LICENSE and required notices are retained.
 
-<p align="center">
-  <a href="https://youtube.com/@adeel-xtech" target="_blank">
-    <img src="https://img.shields.io/badge/▶️_YOUTUBE-@adeel--xtech-F5A623?style=for-the-badge&logo=youtube&logoColor=black&labelColor=1a1100"/>
-  </a>
-</p>
+## Disclaimer
 
-<a><img src='https://i.imgur.com/LyHic3i.gif'/></a>
-
----
-
-## ⚠️ DISCLAIMER
-
-<p align="center">
-  <b>❌ NOT AFFILIATED WITH WHATSAPP INC.</b><br>
-  <b>⚡ MISUSE = BAN RISK</b><br>
-  <b>🛡️ OWNER NOT RESPONSIBLE FOR ANY MISUSE</b>
-</p>
-
-<a><img src='https://i.imgur.com/LyHic3i.gif'/></a>
-
----
-
-<!-- STARGAZERS -->
-<p align="center">
-  <a href="https://github.com/Adeel-Xtech/ADEEL-MD/stargazers">
-    <img src="https://img.shields.io/github/stars/Adeel-Xtech/ADEEL-MD?style=social" alt="Stars"/>
-  </a>
-  &nbsp;
-  <a href="https://github.com/Adeel-Xtech/ADEEL-MD/network/members">
-    <img src="https://img.shields.io/github/forks/Adeel-Xtech/ADEEL-MD?style=social" alt="Forks"/>
-  </a>
-</p>
-
-<!-- FORKERS -->
-<p align="center">
-  <a href="https://github.com/Adeel-Xtech/ADEEL-MD/network/members">
-    <img src="http://reporoster.com/forks/dark/Adeel-Xtech/ADEEL-MD" alt="Forkers"/>
-  </a>
-</p>
-
-<a><img src='https://i.imgur.com/LyHic3i.gif'/></a>
-
-<h2 align="center">✨ ᴛʜᴀɴᴋ ʏᴏᴜ ғᴏʀ ᴜsɪɴɢ ᴀᴅᴇᴇʟ-ᴍᴅ ✨</h2>
-
-<p align="center">
-  <a href="https://github.com/Adeel-Xtech/ADEEL-MD">
-    <img src="https://img.shields.io/badge/⬆️-BACK_TO_TOP-F5A623?style=for-the-badge&labelColor=1a1100"/>
-  </a>
-</p>
+SHADOW is an independent community project and is not affiliated with or endorsed by WhatsApp or Meta. Use responsibly and follow WhatsApp's terms and applicable laws. Unofficial automation may result in account restrictions.

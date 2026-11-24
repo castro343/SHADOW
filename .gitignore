@@ -20,3 +20,25 @@ rad.json
 *.flf
 #Test results file
 TestResults.xml
+
+# SHADOW runtime and private data
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+config.env
+.env
+.env.*
+!.env.example
+auth_info_baileys/
+sessions/
+session/
+store/
+*.session
+*.sqlite
+*.sqlite3
+*.db
+*.log
+tmp/
+temp/
+media/tmp/

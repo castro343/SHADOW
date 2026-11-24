@@ -1,8 +1,12 @@
 {
-  "name": "ADEEL-MD",
-  "description": "Javascript WhatsApp bot made by ADEEL-MD",
-  "logo": "https://files.catbox.moe/sx07qa.jpg",
-  "keywords": ["ADEEL-MD"],
+  "name": "SHADOW",
+  "description": "SHADOW — WhatsApp multi-device bot customized and maintained by CASTRO",
+  "keywords": [
+    "SHADOW",
+    "WhatsApp",
+    "Baileys",
+    "CASTRO"
+  ],
   "success_url": "/",
   "env": {
     "SESSION_ID": {
@@ -11,9 +15,9 @@
       "value": ""
     },
     "STICKER_NAME": {
-      "description": "type your sticker pack name.",
+      "description": "Sticker pack publisher name.",
       "required": false,
-      "value": "ADEEL-MD"
+      "value": "SHADOW"
     },
     "PREFIX": {
       "description": "paste your bot prefix note! Don't apply null prefix.",
@@ -63,22 +67,22 @@
     "AUTO_STATUS_MSG": {
       "description": "Type custom message on status reply",
       "required": true,
-      "value": "*SEEN YOUR STATUS BY ADEEL-MD 🖤*"
+      "value": "*SEEN YOUR STATUS BY SHADOW*"
     },
     "OWNER_NAME": {
-      "description": "Type Bot Owner Name.",
+      "description": "Bot owner display name.",
       "required": false,
-      "value": "ADEEL-MD"
+      "value": "CASTRO"
     },
     "OWNER_NUMBER": {
-      "description": "put the owner number for bot.",
+      "description": "Owner WhatsApp number in international format. Leave blank until configured.",
       "required": false,
-      "value": "923035512967"
+      "value": ""
     },
     "BOT_NAME": {
-      "description": "Type here the bot name.",
+      "description": "The bot display name.",
       "required": false,
-      "value": "ADEEL-MD"
+      "value": "SHADOW"
     },
     "ANTI_LINK": {
       "description": "Make it true if you want bot auto remove group link.",
@@ -101,14 +105,14 @@
       "value": "false"
     },
     "MENU_IMAGE_URL": {
-      "description": "add url for mention reply and menu if want.",
+      "description": "Optional image URL used by menu and mention replies.",
       "required": false,
-      "value": "https://files.catbox.moe/sx07qa.jpg"
+      "value": ""
     },
     "DESCRIPTION": {
-      "description": "add caption for menu and other",
+      "description": "Brand footer used in bot messages.",
       "required": false,
-      "value": "*𝐂𝐑𝐄𝐀𝐓𝐄𝐑 𝐀𝐃𝐄𝐄𝐋-𝐌𝐃*"
+      "value": "*POWERED BY SHADOW • CASTRO*"
     },
     "DELETE_LINKS": {
       "description": "remove links from group automatically without removing member",
@@ -164,6 +168,16 @@
       "description": "Make it true if you want to auto reject WhatsApp calls.",
       "required": false,
       "value": "false"
+    },
+    "DEV": {
+      "description": "Optional developer WhatsApp number in international format.",
+      "required": false,
+      "value": ""
+    },
+    "ALIVE_IMG": {
+      "description": "Optional image URL for the alive response.",
+      "required": false,
+      "value": ""
     }
   },
   "buildpacks": [
