@@ -15,9 +15,9 @@
 - Workflow run: https://github.com/castro343/SHADOW/actions/runs/45383474969
 - Tested commit: `69db50d512b3a7557a83728bb312324d107df578`
 
-## New security milestone tests (CI pending)
+## Security milestone tests (CI pending)
 
-The branch now includes seven additional tests covering minimum owner-token length, exact timing-safe token authorization, malformed actors, ordinary disconnect retries, logged-out session stop behavior, bounded exponential backoff, and supervisor shutdown. These additions have not yet been included in a verified CI run; do not treat them as passed until GitHub Actions reports success.
+The branch now includes eight additional tests covering owner-token validation and authorization, ordinary disconnect retries, logged-out session stop behavior, bounded exponential backoff, supervisor shutdown, and duplicate close-event handling. The new dependency API workflow also checks actual Baileys and MongoDB package exports. These additions have not yet been included in a verified CI run; do not treat them as passed until GitHub Actions reports success.
 
 ## Coverage
 
@@ -32,3 +32,11 @@ The branch now includes seven additional tests covering minimum owner-token leng
 ## Scope limitations
 
 These are unit tests with mocked MongoDB collections, mocked MongoDB client, and mocked Baileys socket boundaries. They do not test a live Atlas database, a live WhatsApp connection, real pairing, Render deployment, process restarts against production data, or end-to-end message delivery. The safe startup guard remains in place until those integration and security checks are completed.
+
+
+## Latest branch test status
+
+- Expected unit-test count after the owner-auth and reconnect additions: 36.
+- CI for the latest branch changes: pending verification.
+- Dependency export check: pending verification.
+- Live Atlas and WhatsApp tests: not run.
