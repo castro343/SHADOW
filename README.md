@@ -59,7 +59,7 @@ Only use this after configuring a **dedicated disposable test database** and con
 npm run pair -- 2547XXXXXXXX
 ```
 
-Use the full international phone number as digits only, including the country code. The utility waits for WhatsApp to connect, checks the owner token, requests one pairing code, prints it once, and closes the transport. It does not expose a public HTTP pairing endpoint. It has not been exercised against a live WhatsApp account yet.
+Use the full international phone number as digits only, including the country code. The utility waits for WhatsApp to connect, checks the owner token, requests one pairing code, prints it once, waits for the target phone to complete registration, confirms that the updated credentials were persisted, and then closes the transport. It does not expose a public HTTP pairing endpoint. It has not been exercised against a live WhatsApp account yet.
 
 ## Deployment
 
