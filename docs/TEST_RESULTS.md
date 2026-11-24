@@ -6,8 +6,6 @@
 
 ## Latest verified GitHub Actions run
 
-<badge>Not part of file content</badge>
-
 - **Unit tests:** 37 passed, 0 failed, 0 skipped.
 - **Dependency API check:** passed; the workflow installed the pinned Baileys `7.0.0-rc14` and MongoDB `7.9.1` packages in an isolated temporary directory and verified the required exports.
 - **SHADOW CI run:** https://github.com/castro343/SHADOW/actions/runs/45384805087
