@@ -12,8 +12,8 @@
 - Failed: 0
 - Skipped: 0
 - Status: **Passed**
-- Workflow run: https://github.com/castro343/SHADOW/actions/runs/45383380396
-- Tested commit: `a0207188ffc21eec1c6293d97ce9102402220769`
+- Workflow run: https://github.com/castro343/SHADOW/actions/runs/45383474969
+- Tested commit: `69db50d512b3a7557a83728bb312324d107df578`
 
 ## Coverage
 
