@@ -2,6 +2,7 @@
 
 const os = require('node:os');
 const crypto = require('node:crypto');
+const config = require('../config');
 
 function formatUptime(seconds) {
   const value = Math.max(0, Math.floor(seconds));
@@ -87,6 +88,37 @@ module.exports = function registerCore(registry) {
         return '• .' + command.name + aliases + ' — ' + (command.description || 'No description');
       });
       return '𝐒𝐇𝐀𝐃𝐎𝐖 COMMANDS\n\n' + lines.join('\n');
+    }
+  });
+
+  registry.register({
+    name: 'owner',
+    description: 'Show SHADOW owner contact details.',
+    permission: 'public',
+    handler: async () => {
+      const number = String(config.OWNER_NUMBER || '').replace(/\\D/g, '');
+      return number
+        ? '𝐒𝐇𝐀𝐃𝐎𝐖 OWNER\\nName: ' + (config.OWNER_NAME || 'CASTRO') + '\\nWhatsApp: https://wa.me/' + number
+        : '𝐒𝐇𝐀𝐃𝐎𝐖 OWNER\\nName: ' + (config.OWNER_NAME || 'CASTRO') + '\\nOwner contact has not been configured yet.';
+    }
+  });
+
+  registry.register({
+    name: 'repo',
+    aliases: ['sc', 'script', 'info'],
+    description: 'Show the SHADOW source repository.',
+    permission: 'public',
+    handler: async () => '𝐒𝐇𝐀𝐃𝐎𝐖 SOURCE\\nhttps://github.com/castro343/SHADOW'
+  });
+
+  registry.register({
+    name: 'menu2',
+    aliases: ['allmenu', 'fullmenu'],
+    description: 'Show all commands currently enabled in SHADOW.',
+    permission: 'public',
+    handler: async () => {
+      const commands = registry.list();
+      return '𝐒𝐇𝐀𝐃𝐎𝐖 — FULL COMMAND LIST\\n\\n' + commands.map(c => '.' + c.name + (c.aliases.length ? ' (' + c.aliases.join(', ') + ')' : '')).join('\\n');
     }
   });
 
