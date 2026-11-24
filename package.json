@@ -8,7 +8,8 @@
     "test": "node --test",
     "start:pm2": "pm2 start index.js --deep-monitoring --name SHADOW",
     "stop": "pm2 stop SHADOW",
-    "restart": "pm2 restart SHADOW"
+    "restart": "pm2 restart SHADOW",
+    "pair": "node scripts/request-pairing-code.js"
   },
   "engines": {
     "node": ">=24.x",
