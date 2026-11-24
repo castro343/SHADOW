@@ -94,3 +94,30 @@ test('stop prevents a delayed reconnect from creating another transport', async 
   gate.resolve();
   assert.equal(starts, 1);
 });
+
+test('does not schedule duplicate retries when closing the old socket emits another close event', async () => {
+  const instances = [];
+  const delays = [];
+  const supervisor = createTransportSupervisor({
+    createTransport: async handlers => {
+      const instance = {
+        handlers,
+        async close() {
+          this.closed = true;
+          handlers.onConnectionUpdate({ connection: 'close', lastDisconnectStatusCode: 500 });
+        }
+      };
+      instances.push(instance);
+      return instance;
+    },
+    sleep: async ms => { delays.push(ms); }
+  });
+
+  await supervisor.start();
+  instances[0].handlers.onConnectionUpdate({ connection: 'close', lastDisconnectStatusCode: 500 });
+  await new Promise(resolve => setImmediate(resolve));
+
+  assert.equal(instances.length, 2);
+  assert.deepEqual(delays, [1000]);
+  await supervisor.stop();
+});
