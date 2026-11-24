@@ -2,7 +2,6 @@ services:
   - type: web
     name: shadow-dashboard
     runtime: static
-    plan: free
     buildCommand: echo "Publishing SHADOW dashboard"
     staticPublishPath: ./public
     autoDeployTrigger: checksPass
