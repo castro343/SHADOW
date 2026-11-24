@@ -1,3 +1,6 @@
+> [!CAUTION]
+> **Deployment is currently on hold.** The current `index.js` downloads and executes bot source from a separate repository at startup, deletes/replaces local files, and overwrites configuration. See [SECURITY_AUDIT.md](SECURITY_AUDIT.md). Do not deploy or run this branch until the runtime is replaced with reviewed, tracked source code.
+
 # 𝐒𝐇𝐀𝐃𝐎𝐖
 
 **A WhatsApp Multi-Device Bot — built and customized by CASTRO.**
