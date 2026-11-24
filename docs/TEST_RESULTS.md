@@ -15,6 +15,10 @@
 - Workflow run: https://github.com/castro343/SHADOW/actions/runs/45383474969
 - Tested commit: `69db50d512b3a7557a83728bb312324d107df578`
 
+## New security milestone tests (CI pending)
+
+The branch now includes seven additional tests covering minimum owner-token length, exact timing-safe token authorization, malformed actors, ordinary disconnect retries, logged-out session stop behavior, bounded exponential backoff, and supervisor shutdown. These additions have not yet been included in a verified CI run; do not treat them as passed until GitHub Actions reports success.
+
 ## Coverage
 
 1. Command registration, aliases, duplicate rejection, and permission enforcement.
