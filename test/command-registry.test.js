@@ -81,7 +81,7 @@ test('ports original main command names and aliases', async () => {
   const list = await registry.dispatch('.commands');
   const menu = await registry.dispatch('.help');
   assert.match(owner.value, /OWNER/);
-  assert.match(repo.value, /github.com\/castro343\/SHADOW/);
+  assert.ok(repo.value.includes('https://github.com/castro343/SHADOW'));
   assert.match(fullMenu.value, /FULL COMMAND LIST/);
   assert.match(weatherHelp.value, /Usage: \.weather/);
   assert.match(wikiHelp.value, /Usage: \.wikipedia/);
