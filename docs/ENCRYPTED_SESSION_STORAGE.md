@@ -1,6 +1,6 @@
 # Encrypted MongoDB Auth-State Adapter
 
-This module is a persistence layer only. It does not connect to WhatsApp, create a Baileys socket, or initiate pairing.
+This module is a persistence layer only. It does not connect to WhatsApp, create a Baileys socket, or initiate pairing. The MongoDB connection helper uses the official Node.js driver (currently pinned by the package range to 7.9.1 or compatible patch/minor releases).
 
 ## Data protection
 
@@ -12,7 +12,7 @@ This module is a persistence layer only. It does not connect to WhatsApp, create
 
 ## MongoDB layout
 
-Use a dedicated collection such as `shadow_auth_state`. Each document belongs to one `sessionId` and contains one encrypted credential or Signal-key value. Create a unique compound index on `{ sessionId: 1, kind: 1, key: 1 }` before production use.
+Use a dedicated collection such as `shadow_auth_state`. Each document belongs to one `sessionId` and contains one encrypted credential or Signal-key value. The adapter creates a unique compound index on `{ sessionId: 1, kind: 1, key: 1 }` when initialized. The `lib/mongo-connection.js` helper validates private settings, connects, pings the selected database, and returns the scoped collection; it closes failed clients without printing connection details.
 
 Suggested environment variables:
 - `MONGODB_URI` — Atlas connection string, stored as a private Render environment variable.
@@ -22,7 +22,7 @@ Suggested environment variables:
 
 ## Baileys integration contract
 
-Pass Baileys' `initAuthCreds` and `BufferJSON` into `createMongoAuthState`, then supply the returned `state` as the socket's `auth` option and register `saveCreds` on `creds.update`. The adapter implements Signal-key `get` and `set` so key mutations are persisted as well as credential updates.
+Pass Baileys' `initAuthCreds` and `BufferJSON` into `createMongoAuthState`, then supply the returned `state` as the socket's `auth` option and register `saveCreds` on `creds.update`. The adapter implements Signal-key `get` and `set` so key mutations are persisted as well as credential updates. Missing keys are returned as `null`, and app-state sync keys are converted through the supplied Baileys `proto` helper. Writes to the same credential/key record are serialized to avoid out-of-order updates.
 
 The MongoDB client lifecycle belongs to the transport process. Connect once, create the unique index, construct the auth state, and close the client after sockets stop and pending writes finish.
 
