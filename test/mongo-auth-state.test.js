@@ -23,6 +23,7 @@ function makeCollection() {
   const idFor = filter => [filter.sessionId, filter.kind, filter.key].join('|');
   return {
     records,
+    async createIndex() { return 'shadow_auth_state_identity'; },
     async findOne(filter) {
       return records.get(idFor(filter)) || null;
     },
@@ -99,10 +100,10 @@ test('persists, reads, and deletes Signal keys per session', async () => {
   await auth.state.keys.set({ session: { abc: { key: Buffer.from([9, 8]) } } });
   const values = await auth.state.keys.get('session', ['abc', 'missing']);
   assert.deepEqual(values.abc.key, Buffer.from([9, 8]));
-  assert.equal(values.missing, undefined);
+  assert.equal(values.missing, null);
 
   await auth.state.keys.set({ session: { abc: null } });
-  assert.deepEqual(await auth.state.keys.get('session', ['abc']), {});
+  assert.deepEqual(await auth.state.keys.get('session', ['abc']), { abc: null });
 });
 
 test('isolates sessions and validates IDs and key types', async () => {
@@ -117,7 +118,49 @@ test('isolates sessions and validates IDs and key types', async () => {
   const b = await createMongoAuthState({ ...common, sessionId: 'account_b' });
 
   await a.state.keys.set({ session: { abc: { secret: 'A' } } });
-  assert.deepEqual(await b.state.keys.get('session', ['abc']), {});
+  assert.deepEqual(await b.state.keys.get('session', ['abc']), { abc: null });
   await assert.rejects(() => createMongoAuthState({ ...common, sessionId: '../bad' }), /Session ID/);
   await assert.rejects(() => a.state.keys.get('../bad', ['abc']), /Signal key type/);
+});
+
+test('converts app-state sync key objects when Baileys proto is supplied', async () => {
+  const collection = makeCollection();
+  const auth = await createMongoAuthState({
+    collection,
+    sessionId: 'proto_session',
+    encryptionKey,
+    initAuthCreds: () => ({ registered: false }),
+    BufferJSON,
+    proto: {
+      Message: {
+        AppStateSyncKeyData: {
+          fromObject: value => ({ converted: true, ...value })
+        }
+      }
+    }
+  });
+
+  await auth.state.keys.set({ 'app-state-sync-key': { key1: { fingerprint: 42 } } });
+  assert.deepEqual(
+    await auth.state.keys.get('app-state-sync-key', ['key1']),
+    { key1: { converted: true, fingerprint: 42 } }
+  );
+});
+
+test('serializes overlapping writes to the same auth key', async () => {
+  const collection = makeCollection();
+  const auth = await createMongoAuthState({
+    collection,
+    sessionId: 'queue_session',
+    encryptionKey,
+    initAuthCreds: () => ({ registered: false }),
+    BufferJSON
+  });
+
+  await Promise.all([
+    auth.state.keys.set({ session: { same: { revision: 1 } } }),
+    auth.state.keys.set({ session: { same: { revision: 2 } } })
+  ]);
+  const stored = await auth.state.keys.get('session', ['same']);
+  assert.equal(stored.same.revision, 2);
 });
