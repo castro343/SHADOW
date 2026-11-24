@@ -2,49 +2,39 @@
 
 ## Owner pairing authorization
 
-`lib/owner-auth.js` exports `createPairingAuthorizer(expectedToken)`. It rejects missing/short secrets and compares equal-length UTF-8 token buffers with Node's `crypto.timingSafeEqual`.
+lib/owner-auth.js exports createPairingAuthorizer(expectedToken). It rejects missing/short secrets and compares equal-length UTF-8 token buffers with Node's crypto.timingSafeEqual.
 
 Operational requirements:
 
-- Generate `SHADOW_PAIRING_TOKEN` from a cryptographically secure random source (at least 32 random bytes).
-- Store it only as a host secret/environment variable; never commit it, print it, or send it through WhatsApp.
-- A trusted local CLI or authenticated owner-only control endpoint must construct the actor object `{ pairingToken }`.
-- Never construct that actor from an inbound WhatsApp message, a command argument, or a user-controlled request body without authentication.
-- The authorizer is not an HTTP server, login system, or complete owner identity system. No control endpoint is enabled by this change.
+- Generate SHADOW_PAIRING_TOKEN from a cryptographically secure random source (at least 32 random bytes).
+- Store it only as a private environment variable; never commit it, print it, or send it through WhatsApp.
+- The local pairing CLI constructs the actor from SHADOW_PAIRING_REQUEST_TOKEN. Do not accept this token from inbound WhatsApp messages or command arguments.
+- The authorizer is not an HTTP server or a complete account-login system. No public pairing endpoint exists.
 
-Example secret generation (run locally in a trusted shell):
+Generate independent secrets locally:
 
-```sh
-node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"
-```
+    node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"
 
 ## Reconnect supervisor
 
-`lib/transport-supervisor.js` accepts an injected transport factory and callbacks. It:
+lib/transport-supervisor.js closes a failed transport before retrying, uses bounded exponential backoff, stops after the configured retry limit, and stops immediately on Baileys logout status 401. It never automatically requests a new pairing code.
 
-- closes the previous transport before retrying;
-- retries ordinary failures with exponential delays capped by `maxDelayMs`;
-- stops after `maxRetries` attempts;
-- stops immediately when the sanitized Baileys disconnect status is 401 (logged out);
-- does not automatically request a new pairing code.
+## Pairing the actual SHADOW account
 
-The default retry schedule starts at 1 second and doubles up to 30 seconds. Tests inject a no-wait sleep function; no live WhatsApp connection is created.
+The approved Atlas target is Project 0 / Cluster0, using the isolated shadow database and shadow_auth_state collection. The local pairing utility is npm run pair.
 
-## Remaining integration work
+1. Set the SHADOW MongoDB URI, database, collection, session ID, encryption key, and two independent pairing tokens in a private config.env file.
+2. Set OWNER_NUMBER to the international digits-only number for the SHADOW owner account.
+3. Run npm run pair -- 2547XXXXXXXX on a trusted local machine.
+4. Enter the one-time code in WhatsApp Linked devices and wait for the CLI to confirm credential persistence.
+5. Start npm start with the same database and encryption settings.
 
-- Implement a trusted owner-control boundary and pass its authorizer into the transport.
-- Verify the exact Baileys disconnect status behavior against the pinned package at runtime.
-- Exercise reconnect and logout handling against a disposable test account only after explicit authorization.
-- Keep the safe `index.js` startup guard until owner control, Atlas integration, runtime dependency validation, and sender/group-admin identity checks are complete.
+Do not use a different bot's MongoDB database or WhatsApp session. The Atlas database user password must be set/reissued privately before pairing. The actual WhatsApp account must belong to or be explicitly authorized by the user.
 
-## Running the local pairing utility
+## Verification still required
 
-The repository includes `scripts/request-pairing-code.js`, exposed as `npm run pair`. It is deliberately a local command rather than a public web endpoint.
-
-1. Configure all MongoDB and encryption settings in a private `config.env` or environment manager.
-2. Generate `SHADOW_PAIRING_TOKEN` as a private random secret of at least 32 bytes.
-3. Supply `SHADOW_PAIRING_REQUEST_TOKEN` independently for the local invocation. Do not store either token in Git or send them in WhatsApp.
-4. Run `npm run pair -- 2547XXXXXXXX` with the target number in international digits-only format.
-5. The utility waits for the Baileys connection to open before requesting the pairing code, then keeps the socket open until the session reports registered credentials, then closes the transport. A timeout prevents an abandoned pairing request from running indefinitely.
-
-The pairing utility has not yet been tested with a live WhatsApp account. Use only a disposable test session and a dedicated test database after the dependency API check passes. Never point it at another bot's session database.
+- Confirm a live MongoDB connection using the application driver.
+- Complete the authorized WhatsApp pairing and confirm encrypted credentials are persisted.
+- Restart the process and verify session recovery.
+- Exercise live disconnect/reconnect and logout handling.
+- Verify sender identity against the configured owner number. Group-admin commands remain disabled until metadata verification is implemented.
