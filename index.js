@@ -1,6 +1,5 @@
 'use strict';
 
-// SHADOW runtime entrypoint. No remote loaders, dynamic evaluation, or implicit pairing.
 require('dotenv').config({ path: process.env.SHADOW_ENV_FILE || 'config.env' });
 
 const config = require('./config');
@@ -10,7 +9,7 @@ const { CommandRegistry } = require('./lib/command-registry');
 const { loadPlugins } = require('./lib/plugin-loader');
 
 function normalizeOwnerJid(number) {
-  const digits = String(number || '').replace(/\\D/g, '');
+  const digits = String(number || '').replace(/\D/g, '');
   return digits ? digits + '@s.whatsapp.net' : '';
 }
 
@@ -33,8 +32,7 @@ function extractText(message) {
 }
 
 async function main() {
-  const prefix = config.PREFIX;
-  const registry = new CommandRegistry({ prefix });
+  const registry = new CommandRegistry({ prefix: config.PREFIX });
   loadPlugins({ registry, allowlist: ['core'] });
 
   const ownerJid = normalizeOwnerJid(config.OWNER_NUMBER);
@@ -46,21 +44,22 @@ async function main() {
     }),
     onConnectionUpdate(update) {
       if (update.connection === 'open') {
-        process.stdout.write('SHADOW WhatsApp connection is open.\\n');
+        process.stdout.write('SHADOW WhatsApp connection is open.\n');
       } else if (update.connection === 'close') {
-        process.stderr.write('SHADOW WhatsApp connection closed; reconnect policy will decide the next step.\\n');
+        process.stderr.write('SHADOW WhatsApp connection closed; reconnect policy will decide the next step.\n');
       }
     },
     async onMessage(message) {
-      const text = extractText(message);
-      if (!text || !text.startsWith(prefix)) return;
+      const commandText = extractText(message);
+      if (!commandText || !commandText.startsWith(config.PREFIX)) return;
 
       const isOwner = Boolean(ownerJid && message.senderJid === ownerJid);
-      const result = await registry.dispatch(text, {
+      const result = await registry.dispatch(commandText, {
         chatId: message.chatId,
         senderJid: message.senderJid,
         isGroup: message.isGroup,
         isOwner,
+        // No admin-level commands are enabled until group metadata verification is implemented.
         isGroupAdmin: false,
         pushName: message.pushName
       });
@@ -73,23 +72,21 @@ async function main() {
           : result.reason === 'unknown-command'
             ? 'Unknown command. Send .menu to see available commands.'
             : 'SHADOW could not complete that command.';
-      if (response) {
-        await message.sendText(response);
-      }
+      if (response) await message.sendText(response);
     },
     onError(error) {
-      process.stderr.write('[SHADOW] ' + (error?.message || error?.code || 'Runtime error') + '\\n');
+      process.stderr.write('[SHADOW] ' + (error?.message || error?.code || 'Runtime error') + '\n');
     }
   });
 
   await supervisor.start();
-  process.stdout.write('SHADOW runtime started. Only reviewed core commands are enabled.\\n');
+  process.stdout.write('SHADOW runtime started. Only reviewed core commands are enabled.\n');
 
   let stopping = false;
   const shutdown = async signal => {
     if (stopping) return;
     stopping = true;
-    process.stdout.write('SHADOW received ' + signal + '; shutting down safely.\\n');
+    process.stdout.write('SHADOW received ' + signal + '; shutting down safely.\n');
     await supervisor.stop();
     process.exitCode = 0;
   };
@@ -98,7 +95,6 @@ async function main() {
 }
 
 main().catch(error => {
-  process.stderr.write('[SHADOW] Startup failed: ' + error.message + '\\n');
+  process.stderr.write('[SHADOW] Startup failed: ' + error.message + '\n');
   process.exitCode = 1;
 });
-
