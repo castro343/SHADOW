@@ -4,6 +4,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const { CommandRegistry, canExecute } = require('../lib/command-registry');
 const { loadPlugins } = require('../lib/plugin-loader');
+const registerCore = require('../plugins/core');
 
 test('registers commands and resolves aliases', async () => {
   const registry = new CommandRegistry();
@@ -59,4 +60,14 @@ test('loads only explicitly allowlisted plugin modules', () => {
   assert.deepEqual(loaded, ['core']);
   assert.deepEqual(calls, ['/safe/plugins/core.js']);
   assert.throws(() => loadPlugins({ registry, allowlist: ['../outside'], load() {} }), /Invalid plugin name/);
+});
+
+test('core plugin registers ping and menu without connecting to WhatsApp', async () => {
+  const registry = new CommandRegistry();
+  registerCore(registry);
+  const ping = await registry.dispatch('.ping');
+  const menu = await registry.dispatch('.help');
+  assert.match(ping.value, /SHADOW command core is responding/);
+  assert.match(menu.value, /\.ping/);
+  assert.match(menu.value, /\.menu/);
 });
