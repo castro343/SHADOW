@@ -1,6 +1,7 @@
 'use strict';
 
 const os = require('node:os');
+const crypto = require('node:crypto');
 
 function formatUptime(seconds) {
   const value = Math.max(0, Math.floor(seconds));
@@ -12,6 +13,33 @@ function formatUptime(seconds) {
 }
 
 module.exports = function registerCore(registry) {
+
+  // Original ADEEL-MD check-uptime.js command names and aliases.
+  registry.register({
+    name: 'uptime',
+    aliases: ['runtime', 'up'],
+    description: 'Show how long SHADOW has been running.',
+    permission: 'public',
+    handler: async () => '𝐒𝐇𝐀𝐃𝐎𝐖 UPTIME: ' + formatUptime(process.uptime())
+  });
+
+  // Original ADEEL-MD gen-pass.js command name; bounded to avoid abuse.
+  registry.register({
+    name: 'gpass',
+    description: 'Generate a cryptographically random password.',
+    permission: 'public',
+    handler: async ({ args }) => {
+      const length = args[0] === undefined ? 12 : Number(args[0]);
+      if (!Number.isInteger(length) || length < 8 || length > 128) {
+        return 'Usage: .gpass [length 8-128]';
+      }
+      const alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+[]{}|;:,.<>?';
+      let password = '';
+      for (let i = 0; i < length; i += 1) password += alphabet[crypto.randomInt(alphabet.length)];
+      return '🔐 SHADOW PASSWORD (' + length + ' characters)\n\n' + password;
+    }
+  });
+
   // Original ADEEL-MD main-ping.js command names and aliases.
   registry.register({
     name: 'ping',
