@@ -16,15 +16,34 @@ async function main() {
     throw new Error('Set SHADOW_PAIRING_TOKEN and SHADOW_PAIRING_REQUEST_TOKEN in the private runtime environment.');
   }
 
-  const authorizePairing = createPairingAuthorizer(expectedToken);
-  const transport = await createWhatsAppTransport({ authorizePairing });
+  let resolveOpen;
+  let rejectOpen;
+  const connectionReady = new Promise((resolve, reject) => {
+    resolveOpen = resolve;
+    rejectOpen = reject;
+  });
+  const timeout = setTimeout(() => rejectOpen(new Error('Timed out waiting for WhatsApp connection.')), 60000);
+  let transport;
 
   try {
+    const authorizePairing = createPairingAuthorizer(expectedToken);
+    transport = await createWhatsAppTransport({
+      authorizePairing,
+      onConnectionUpdate(update) {
+        if (update.connection === 'open') resolveOpen();
+        if (update.connection === 'close') {
+          rejectOpen(new Error('WhatsApp connection closed before pairing could start.'));
+        }
+      }
+    });
+
+    await connectionReady;
     const code = await transport.requestPairingCode({ pairingToken: requestToken }, phoneNumber);
     process.stdout.write('SHADOW pairing code: ' + code + '\n');
     process.stdout.write('Enter this code in WhatsApp on the phone number you are pairing.\n');
   } finally {
-    await transport.close();
+    clearTimeout(timeout);
+    if (transport) await transport.close();
   }
 }
 
