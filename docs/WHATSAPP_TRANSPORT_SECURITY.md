@@ -1,54 +1,50 @@
 # SHADOW WhatsApp Transport & Pairing Security
 
-This is the implementation contract for the next transport milestone. It does not create a WhatsApp socket, request a pairing code, or load session data.
+The first Baileys transport adapter now exists in `lib/whatsapp-transport.js`. It is tested with mocked socket and MongoDB boundaries. It is not started by `index.js` and has not connected to a real WhatsApp account.
 
-## Supported connection method
+## Current transport behavior
 
-- SHADOW will use the reviewed `@whiskeysockets/baileys` dependency already declared in `package.json`.
-- Pairing-code login is the intended first login flow; QR output will remain disabled in the hosted service.
-- The pairing number must include the country calling code and contain digits only. For Kenya, the format begins with `254`, not the domestic leading `0`.
-- Pairing must be explicitly initiated by the owner. It must never happen on every process boot.
+- Dynamically imports the installed `@whiskeysockets/baileys` package.
+- Creates one socket with the encrypted MongoDB auth state.
+- Uses `markOnlineOnConnect: false`, `syncFullHistory: false`, and `printQRInTerminal: false`.
+- Persists credential updates and Signal-key mutations.
+- Exposes normalized inbound message data, filtering self-sent messages and broadcast/status traffic.
+- Deduplicates recent inbound message IDs in memory.
+- Does not expose the raw socket to command plugins.
+- Does not auto-request pairing codes.
+- Closes the socket and MongoDB client through an explicit close method.
 
 ## Pairing boundary
 
-`lib/pairing.js` validates the number and refuses to request a code unless the socket explicitly reports an unregistered credential state. The caller must add rate limiting, owner-only authorization, a short-lived pairing state, and safe delivery of the code before exposing pairing through an HTTP route or chat command.
+Pairing requires an explicit call to `transport.requestPairingCode(actor, phoneNumber)`. The transport refuses to proceed unless an injected `authorizePairing(actor)` callback approves the actor. The authorization callback must be implemented by a trusted owner-authentication layer; do not use an unverified HTTP request field or a chat message's claimed sender as proof of ownership.
 
-Never write pairing codes, phone numbers, auth credentials, or Signal keys to application logs.
+The phone number must include the country calling code and contain digits only. For Kenya, the format begins with `254`, not the domestic leading `0`.
 
-## Session persistence requirements
+Never log phone numbers, pairing codes, QR payloads, auth credentials, or Signal keys.
 
-The production auth-state adapter must persist both:
-1. credential updates (`creds.update`), and
-2. Signal key-store mutations (including `authState.keys.set()`).
+## Session persistence
 
-A credentials-only database save is incomplete and can break message delivery. The adapter must serialize binary values safely, encrypt sensitive records at rest, scope every record to one account/session, and support atomic updates. Session secrets must never enter Git, build artifacts, public endpoints, or ordinary logs.
+The transport uses the AES-256-GCM MongoDB auth-state adapter in `lib/mongo-auth-state.js`. Both credentials and Signal key-store mutations are persisted. The encryption key is supplied through `SHADOW_SESSION_ENCRYPTION_KEY`, separately from the MongoDB connection string.
 
-Baileys' multi-file auth helper is useful as a reference implementation, but SHADOW will not treat an ephemeral Render filesystem as durable production storage. A database-backed adapter must be reviewed and tested before hosted pairing is enabled.
+Required private environment:
+- `MONGODB_URI`
+- `MONGODB_DATABASE`
+- `MONGODB_COLLECTION` (optional; defaults to `shadow_auth_state`)
+- `SHADOW_SESSION_ENCRYPTION_KEY` (32 bytes, hex or base64)
+- `SHADOW_SESSION_ID` (logical account identifier)
 
-## Connection lifecycle
+The MongoDB collection uses a unique compound index on `{ sessionId: 1, kind: 1, key: 1 }`.
 
-- Create one socket per explicitly configured account.
-- Register credential/key persistence handlers before accepting messages.
-- Reconnect with bounded exponential backoff and jitter; do not create overlapping sockets.
-- Stop reconnecting after logout or an explicit owner stop.
-- Close sockets and flush persistence on graceful shutdown.
-- Do not mark the account online unless configured; prefer `markOnlineOnConnect: false`.
-- Do not process status/broadcast messages by default.
-- Ignore messages sent by the bot itself and deduplicate inbound message IDs.
+## Remaining integration work
 
-## Message trust boundary
-
-The transport adapter alone derives sender JID, group JID, owner identity, and group-admin status from authenticated Baileys event data and fresh group metadata. Plugins never receive raw socket internals or a way to forge permission flags.
-
-## Deployment gate
-
-Do not enable `index.js` startup or deploy a live bot until:
-- Node 24 CI is green;
-- dependency versions are pinned and reviewed;
-- durable encrypted auth/key storage is implemented and tested;
-- pairing is owner-authorized, rate-limited, and never exposed publicly;
-- reconnect/shutdown behavior has tests;
-- inbound command dispatch has transport-level permission and deduplication tests.
+Before production connection:
+1. Implement and review the trusted owner-authentication callback.
+2. Add bounded reconnect/backoff and explicit logout handling.
+3. Add integration tests against a disposable MongoDB database.
+4. Verify the exact installed Baileys package exports and auth-state behavior in Node.js 24.
+5. Add a safe shutdown hook and test interrupted writes/process restarts.
+6. Add transport-level sender and group-admin verification before command dispatch.
+7. Keep the startup guard in `index.js` until the above gates pass.
 
 ## Explicitly excluded
 
