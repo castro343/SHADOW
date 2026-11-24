@@ -1,23 +1,18 @@
 # SHADOW Runtime Foundation — Test Results
 
 **Date:** 2026-11-24  
-**Command:** `npm test` (`node --test`)  
-**Primary CI runtime:** Node.js 24  
-**Initial local runtime:** Node.js v22.16.0
+**Runtime:** Node.js 24  
+**Unit-test command:** `npm test` (`node --test`)
 
-## Latest Node.js 24 CI result
+## Latest verified GitHub Actions run
 
-- Tests: 28
-- Passed: 28
-- Failed: 0
-- Skipped: 0
-- Status: **Passed**
-- Workflow run: https://github.com/castro343/SHADOW/actions/runs/45383474969
-- Tested commit: `69db50d512b3a7557a83728bb312324d107df578`
+<badge>Not part of file content</badge>
 
-## Security milestone tests (CI pending)
-
-The branch now includes nine additional tests covering owner-token validation and authorization, ordinary disconnect retries, logged-out session stop behavior, bounded exponential backoff, supervisor shutdown, and duplicate close-event handling. The new dependency API workflow also checks actual Baileys and MongoDB package exports. These additions have not yet been included in a verified CI run; do not treat them as passed until GitHub Actions reports success.
+- **Unit tests:** 37 passed, 0 failed, 0 skipped.
+- **Dependency API check:** passed; the workflow installed the pinned Baileys `7.0.0-rc14` and MongoDB `7.9.1` packages in an isolated temporary directory and verified the required exports.
+- **SHADOW CI run:** https://github.com/castro343/SHADOW/actions/runs/45384805087
+- **Legacy unit-test workflow:** https://github.com/castro343/SHADOW/actions/runs/45384805103
+- **Verified commit:** `59643c77ef45c4f22993317c194bf4dd672e6286`
 
 ## Coverage
 
@@ -27,16 +22,19 @@ The branch now includes nine additional tests covering owner-token validation an
 4. AES-256-GCM encryption, authentication-tag tamper detection, and credential restoration.
 5. MongoDB auth-state persistence for Signal keys, deletion, session isolation, missing-key semantics, app-state sync key conversion, and serialized writes.
 6. MongoDB configuration validation, connection/ping flow, and safe cleanup after connection failure.
-7. Baileys transport setup, safe socket defaults, owner-authorization gate for pairing, inbound-message normalization, status/self filtering, message deduplication, and database cleanup.
+7. Baileys transport setup, safe socket defaults, owner-authorization gate for pairing, inbound-message normalization, status/self filtering, message deduplication, database cleanup, and sanitized registration callbacks.
+8. Owner-token minimum length, exact token authorization, malformed actor rejection, and non-string credential rejection.
+9. Reconnect behavior: ordinary close retry, logout stop, bounded exponential backoff, shutdown, and duplicate close-event protection.
 
 ## Scope limitations
 
-These are unit tests with mocked MongoDB collections, mocked MongoDB client, and mocked Baileys socket boundaries. They do not test a live Atlas database, a live WhatsApp connection, real pairing, Render deployment, process restarts against production data, or end-to-end message delivery. The safe startup guard remains in place until those integration and security checks are completed.
+The unit tests use mocked MongoDB collections/clients and mocked Baileys socket boundaries. The package API workflow verifies real npm package installation and required exports, but it does not create a WhatsApp connection.
 
+Not yet tested:
+- Live MongoDB Atlas connectivity using a dedicated disposable database.
+- Real WhatsApp pairing and successful session persistence.
+- Reconnection behavior against live Baileys socket disconnects.
+- Process restart and recovery using an integration database.
+- Render deployment, end-to-end message delivery, and authenticated sender/group-admin metadata.
 
-## Latest branch test status
-
-- Expected unit-test count after the owner-auth, reconnect, and pairing-registration additions: 37.
-- CI for the latest branch changes: pending verification.
-- Dependency export check: pending verification.
-- Live Atlas and WhatsApp tests: not run.
+The safe startup guard remains in place. Passing unit tests and package export checks do not authorize production deployment.
