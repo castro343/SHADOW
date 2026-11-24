@@ -2,7 +2,7 @@
 
 Source: [Adeel-Xtech/ADEEL-MD](https://github.com/Adeel-Xtech/ADEEL-MD), whose fork payload is loaded by the upstream bootstrap from [the external payload repository](https://github.com/jvgucuhihkvjkjbh/zovvkvchghhGogjYurubvVbbbbZz).
 
-This is a source inventory, not a claim that the commands have already been ported. It records every JavaScript plugin in the inspected payload so migration can preserve names and aliases while replacing unsafe implementation details. SHADOW currently runs its reviewed core command module; plugin migration remains in progress.
+This is a source inventory, not a claim that the commands have already been ported. It records every JavaScript plugin in the inspected payload so migration can preserve names and aliases while replacing unsafe implementation details. SHADOW now includes the first migrated command batch in `plugins/core.js`; the remaining plugin migration remains in progress.
 
 **Plugin files discovered: 158.**
 
@@ -194,3 +194,16 @@ This is a source inventory, not a claim that the commands have already been port
 ## Known high-risk areas
 
 The inspected payload includes files for Heroku app deletion, SMS bombing, arbitrary URL fetching, external pairing relays, update/restart automation, and broad broadcast or chat-management operations. These are not copied blindly. Safe equivalents or documented exclusions are required.
+
+## First migrated command batch
+
+Ported into SHADOW's reviewed core registry from the original payload:
+
+| Original source file | Commands and aliases now registered |
+|---|---|
+| `plugins/main-ping.js` | `.ping` (aliases: `.speed`, `.pong`), `.ping2` |
+| `plugins/main-alive.js` | `.alive` (aliases: `.status`, `.online`, `.a`) |
+| `plugins/list-cmd.js` | `.list` (aliases: `.listcmd`, `.commands`) |
+| SHADOW core menu | `.menu` (alias: `.help`) |
+
+The above command names and aliases are registered and covered by unit tests. Their responses are rebranded for SHADOW; advanced presentation details from the upstream handlers are intentionally not copied where they depend on the original newsletter identity or unsafe assumptions.
