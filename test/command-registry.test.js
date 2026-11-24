@@ -62,12 +62,18 @@ test('loads only explicitly allowlisted plugin modules', () => {
   assert.throws(() => loadPlugins({ registry, allowlist: ['../outside'], load() {} }), /Invalid plugin name/);
 });
 
-test('core plugin registers ping and menu without connecting to WhatsApp', async () => {
+test('ports original main command names and aliases', async () => {
   const registry = new CommandRegistry();
   registerCore(registry);
+  for (const name of ['ping', 'speed', 'pong', 'ping2', 'alive', 'status', 'online', 'a', 'list', 'listcmd', 'commands', 'menu', 'help']) {
+    assert.ok(registry.get(name), 'missing original command or alias: ' + name);
+  }
   const ping = await registry.dispatch('.ping');
+  const alive = await registry.dispatch('.alive');
+  const list = await registry.dispatch('.commands');
   const menu = await registry.dispatch('.help');
-  assert.match(ping.value, /SHADOW command core is responding/);
-  assert.match(menu.value, /\.ping/);
+  assert.match(ping.value, /SHADOW SPEED/);
+  assert.match(alive.value, /SHADOW STATUS/);
+  assert.match(list.value, /\.ping/);
   assert.match(menu.value, /\.menu/);
 });
