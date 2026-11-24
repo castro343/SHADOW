@@ -139,7 +139,7 @@ test('does not expose QR contents in connection callbacks and deduplicates messa
   baileys.socket.ev.emit('messages.upsert', { type: 'notify', messages: [msg, msg] });
   await new Promise(resolve => setImmediate(resolve));
 
-  assert.deepEqual(updates, [{ connection: 'open', hasQr: true, isNewLogin: false, receivedPendingNotifications: false }]);
+  assert.deepEqual(updates, [{ connection: 'open', hasQr: true, isNewLogin: false, receivedPendingNotifications: false, lastDisconnectStatusCode: null }]);
   assert.equal(messages.length, 1);
   assert.equal(messages[0].message.conversation, 'hello');
   await transport.close();
@@ -162,7 +162,7 @@ test('closes MongoDB if socket creation fails', async () => {
 
 test('sanitizes connection updates', () => {
   assert.deepEqual(
-    safeConnectionUpdate({ connection: 'close', qr: 'do-not-return', isNewLogin: true }),
-    { connection: 'close', hasQr: true, isNewLogin: true, receivedPendingNotifications: false }
+    safeConnectionUpdate({ connection: 'close', qr: 'do-not-return', isNewLogin: true, lastDisconnect: { error: { output: { statusCode: 401 } } } }),
+    { connection: 'close', hasQr: true, isNewLogin: true, receivedPendingNotifications: false, lastDisconnectStatusCode: 401 }
   );
 });
