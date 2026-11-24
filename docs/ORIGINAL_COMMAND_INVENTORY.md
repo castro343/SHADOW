@@ -204,6 +204,9 @@ Ported into SHADOW's reviewed core registry from the original payload:
 | `plugins/main-ping.js` | `.ping` (aliases: `.speed`, `.pong`), `.ping2` |
 | `plugins/main-alive.js` | `.alive` (aliases: `.status`, `.online`, `.a`) |
 | `plugins/list-cmd.js` | `.list` (aliases: `.listcmd`, `.commands`) |
+| `plugins/check-uptime.js` | `.uptime` (aliases: `.runtime`, `.up`) |
+| `plugins/gen-pass.js` | `.gpass` (secure random generation; bounded to 8–128 characters) |
+
 | SHADOW core menu | `.menu` (alias: `.help`) |
 
 The above command names and aliases are registered and covered by unit tests. Their responses are rebranded for SHADOW; advanced presentation details from the upstream handlers are intentionally not copied where they depend on the original newsletter identity or unsafe assumptions.
