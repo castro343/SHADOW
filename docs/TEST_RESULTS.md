@@ -1,28 +1,29 @@
 # SHADOW Runtime Foundation — Test Results
 
 **Date:** 2026-11-24  
-**Command:** `node --test`  
-**Runtime used for this test run:** Node.js v22.16.0
+**Command:** `npm test` (`node --test`)  
+**Primary CI runtime:** Node.js 24  
+**Initial local runtime:** Node.js v22.16.0
 
-## Result
+## Latest Node.js 24 CI result
 
-- Tests: 7
-- Passed: 7
+- Tests: 22
+- Passed: 22
 - Failed: 0
 - Skipped: 0
+- Status: **Passed**
+- Workflow run: https://github.com/castro343/SHADOW/actions/runs/45383205226
+- Tested commit: `99f8adea8cc9a9a29db3e2c379afdbca4606b101`
 
-Covered behaviors:
+## Coverage
 
-1. Command registration and alias resolution.
-2. Duplicate command and alias rejection.
-3. Owner and group-admin permission decisions.
-4. Blocking a protected command for an ordinary member.
-5. Ignoring ordinary messages and reporting unknown commands.
-6. Explicit plugin allowlisting and rejection of path-traversal names.
-7. Core plugin registration and local `.ping` / `.help` dispatch.
+1. Command registration, aliases, duplicate rejection, and permission enforcement.
+2. Explicit plugin allowlisting and core ping/menu registration.
+3. Pairing number validation and refusal to pair an already-registered session.
+4. AES-256-GCM encryption, authentication-tag tamper detection, and credential restoration.
+5. MongoDB auth-state persistence for Signal keys, deletion, session isolation, missing-key semantics, app-state sync key conversion, and serialized writes.
+6. MongoDB configuration validation, connection/ping flow, and safe cleanup after connection failure.
 
-## Runtime-version qualification
+## Scope limitations
 
-The repository currently declares Node.js `>=24.x`. The available execution environment for this run was Node.js 22.16.0. The seven tests passed on that runtime, but this is not a substitute for a Node.js 24 CI run. Before deployment, run the same suite on Node.js 24 and add a CI check.
-
-These are isolated unit tests. They do not test a live WhatsApp connection, pairing, session persistence, group metadata, or end-to-end message delivery. The safe startup guard remains in place.
+These are unit tests with mocked MongoDB collections and mocked socket-facing boundaries. They do not test a live Atlas database, a live WhatsApp connection, real pairing, Render deployment, process restarts against production data, or end-to-end message delivery. The safe startup guard remains in place until those integration and security checks are completed.
