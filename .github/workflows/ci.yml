@@ -1,0 +1,61 @@
+name: SHADOW CI
+
+on:
+  push:
+    branches:
+      - "**"
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  unit-tests:
+    name: Unit tests (Node 24)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Run unit tests
+        run: npm test
+
+  dependency-api-check:
+    name: Verify Baileys and MongoDB package APIs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install isolated runtime dependencies
+        run: |
+          mkdir -p "$RUNNER_TEMP/shadow-deps"
+          npm install --prefix "$RUNNER_TEMP/shadow-deps" --no-save --ignore-scripts --no-audit --no-fund \
+            @whiskeysockets/baileys@7.0.0-rc14 mongodb@7.9.1
+      - name: Verify required exports
+        working-directory: ${{ runner.temp }}/shadow-deps
+        run: |
+          node --input-type=module <<'NODE'
+          const baileys = await import('@whiskeysockets/baileys');
+          const mongodb = await import('mongodb');
+
+          const requiredBaileys = [
+            ['socket factory', typeof (baileys.default || baileys.makeWASocket) === 'function'],
+            ['initAuthCreds', typeof baileys.initAuthCreds === 'function'],
+            ['BufferJSON', Boolean(baileys.BufferJSON)],
+            ['proto', Boolean(baileys.proto)],
+            ['makeCacheableSignalKeyStore', typeof baileys.makeCacheableSignalKeyStore === 'function']
+          ];
+
+          for (const [name, ok] of requiredBaileys) {
+            if (!ok) throw new Error('Missing Baileys API export: ' + name);
+          }
+          if (typeof mongodb.MongoClient !== 'function') {
+            throw new Error('Missing MongoDB MongoClient export.');
+          }
+          process.stdout.write('Required Baileys and MongoDB exports are available.\n');
+          NODE
