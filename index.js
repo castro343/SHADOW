@@ -36,6 +36,10 @@ async function main() {
   loadPlugins({ registry, allowlist: ['core'] });
 
   const ownerJid = normalizeOwnerJid(config.OWNER_NUMBER);
+  const mode = String(config.MODE || 'private').toLowerCase();
+  if (!['private', 'public'].includes(mode)) {
+    throw new Error('MODE must be either private or public.');
+  }
   const supervisor = createTransportSupervisor({
     createTransport: handlers => createWhatsAppTransport({
       onConnectionUpdate: handlers.onConnectionUpdate,
@@ -54,6 +58,7 @@ async function main() {
       if (!commandText || !commandText.startsWith(config.PREFIX)) return;
 
       const isOwner = Boolean(ownerJid && message.senderJid === ownerJid);
+      if (mode === 'private' && !isOwner) return;
       const result = await registry.dispatch(commandText, {
         chatId: message.chatId,
         senderJid: message.senderJid,
