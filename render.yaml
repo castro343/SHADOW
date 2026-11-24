@@ -1,0 +1,43 @@
+services:
+  - type: worker
+    name: shadow-bot
+    runtime: docker
+    plan: free
+    region: singapore
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    autoDeployTrigger: checksPass
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MODE
+        value: private
+      - key: MONGODB_URI
+        sync: false
+      - key: MONGODB_DATABASE
+        value: shadow
+      - key: MONGODB_COLLECTION
+        value: shadow_auth_state
+      - key: SHADOW_SESSION_ID
+        value: primary
+      - key: SHADOW_SESSION_ENCRYPTION_KEY
+        generateValue: true
+      - key: OWNER_NUMBER
+        sync: false
+      - key: SHADOW_PAIRING_TOKEN
+        generateValue: true
+      - key: SHADOW_PAIRING_REQUEST_TOKEN
+        generateValue: true
+  - type: web
+    name: shadow-dashboard
+    runtime: static
+    buildCommand: echo "Publishing SHADOW dashboard"
+    staticPublishPath: ./public
+    autoDeployTrigger: checksPass
+    headers:
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin
