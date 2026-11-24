@@ -17,7 +17,7 @@
 
 ## Security milestone tests (CI pending)
 
-The branch now includes eight additional tests covering owner-token validation and authorization, ordinary disconnect retries, logged-out session stop behavior, bounded exponential backoff, supervisor shutdown, and duplicate close-event handling. The new dependency API workflow also checks actual Baileys and MongoDB package exports. These additions have not yet been included in a verified CI run; do not treat them as passed until GitHub Actions reports success.
+The branch now includes nine additional tests covering owner-token validation and authorization, ordinary disconnect retries, logged-out session stop behavior, bounded exponential backoff, supervisor shutdown, and duplicate close-event handling. The new dependency API workflow also checks actual Baileys and MongoDB package exports. These additions have not yet been included in a verified CI run; do not treat them as passed until GitHub Actions reports success.
 
 ## Coverage
 
@@ -36,7 +36,7 @@ These are unit tests with mocked MongoDB collections, mocked MongoDB client, and
 
 ## Latest branch test status
 
-- Expected unit-test count after the owner-auth and reconnect additions: 36.
+- Expected unit-test count after the owner-auth, reconnect, and pairing-registration additions: 37.
 - CI for the latest branch changes: pending verification.
 - Dependency export check: pending verification.
 - Live Atlas and WhatsApp tests: not run.
