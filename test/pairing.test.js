@@ -16,26 +16,25 @@ test('rejects local, formatted, non-string, and out-of-range numbers', () => {
 
 test('requests a pairing code only for an unregistered socket', async () => {
   let requestedNumber;
+  const credentials = { registered: false };
   const socket = {
-    authState: { creds: { registered: false } },
     requestPairingCode: async number => {
       requestedNumber = number;
       return 'ABCD-EFGH';
     }
   };
 
-  assert.equal(await requestPairingCode(socket, '254712345678'), 'ABCD-EFGH');
+  assert.equal(await requestPairingCode(socket, '254712345678', credentials), 'ABCD-EFGH');
   assert.equal(requestedNumber, '254712345678');
 });
 
 test('refuses pairing when the session is already registered', async () => {
   const socket = {
-    authState: { creds: { registered: true } },
     requestPairingCode: async () => 'SHOULD_NOT_RUN'
   };
-  await assert.rejects(() => requestPairingCode(socket, '254712345678'), /unregistered session/);
+  await assert.rejects(() => requestPairingCode(socket, '254712345678', { registered: true }), /unregistered session/);
 });
 
 test('refuses an invalid socket', async () => {
-  await assert.rejects(() => requestPairingCode({}, '254712345678'), TypeError);
+  await assert.rejects(() => requestPairingCode({}, '254712345678', { registered: false }), TypeError);
 });
