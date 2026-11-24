@@ -5,7 +5,7 @@ This document describes the clean runtime foundation. It does not enable WhatsAp
 ## Runtime layers
 
 1. **Configuration** — validated environment values; secrets remain outside Git.
-2. **Transport** — a separately reviewed WhatsApp/Baileys adapter. It must not download or execute code.
+2. **Transport** — `lib/whatsapp-transport.js` creates a Baileys socket with encrypted MongoDB auth state, filters inbound events, and keeps pairing behind an injected owner-authorization callback. It must not download or execute code.
 3. **Message normalization** — converts transport events into a small, documented message context.
 4. **Command registry** — validates command names, aliases, and permission levels.
 5. **Plugin loader** — loads only exact names from a code-reviewed local allowlist. It never scans directories or accepts a name from a message.
@@ -36,8 +36,8 @@ The plugin is inert until its exact file name is added to the runtime's reviewed
 
 ## Current boundary
 
-- No WhatsApp socket is created.
-- No pairing/session data is read or written.
+- A transport factory exists, but the startup guard does not invoke it and no live WhatsApp socket has been created.
+- The encrypted MongoDB auth-state adapter and guarded pairing helper exist; no production session has been loaded or written.
 - No plugins are enabled by default.
 - No remote code, dynamic evaluation, or automatic updater is permitted.
 - The startup guard remains active until the transport and configuration layers have tests and a complete review.
