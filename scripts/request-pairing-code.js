@@ -22,8 +22,20 @@ async function main() {
     resolveOpen = resolve;
     rejectOpen = reject;
   });
-  const timeout = setTimeout(() => rejectOpen(new Error('Timed out waiting for WhatsApp connection.')), 60000);
+  // Attach a handler immediately; the original promise is still awaited below.
+  void connectionReady.catch(() => {});
+
+  let resolveRegistered;
+  let rejectRegistered;
+  const registrationReady = new Promise((resolve, reject) => {
+    resolveRegistered = resolve;
+    rejectRegistered = reject;
+  });
+  void registrationReady.catch(() => {});
+
   let transport;
+  let connectionTimeout;
+  let pairingTimeout;
 
   try {
     const authorizePairing = createPairingAuthorizer(expectedToken);
@@ -33,16 +45,35 @@ async function main() {
         if (update.connection === 'open') resolveOpen();
         if (update.connection === 'close') {
           rejectOpen(new Error('WhatsApp connection closed before pairing could start.'));
+          rejectRegistered(new Error('WhatsApp connection closed before pairing completed.'));
         }
+      },
+      onCredentialsUpdate(update) {
+        if (update.registered) resolveRegistered();
       }
     });
 
+    connectionTimeout = setTimeout(
+      () => rejectOpen(new Error('Timed out waiting for WhatsApp connection.')),
+      60000
+    );
     await connectionReady;
+    clearTimeout(connectionTimeout);
+    connectionTimeout = null;
+
     const code = await transport.requestPairingCode({ pairingToken: requestToken }, phoneNumber);
     process.stdout.write('SHADOW pairing code: ' + code + '\n');
-    process.stdout.write('Enter this code in WhatsApp on the phone number you are pairing.\n');
+    process.stdout.write('Enter this code in WhatsApp on the target phone. Keep this process running.\n');
+
+    pairingTimeout = setTimeout(
+      () => rejectRegistered(new Error('Pairing was not completed within three minutes.')),
+      180000
+    );
+    await registrationReady;
+    process.stdout.write('SHADOW session registration confirmed and saved securely.\n');
   } finally {
-    clearTimeout(timeout);
+    if (connectionTimeout) clearTimeout(connectionTimeout);
+    if (pairingTimeout) clearTimeout(pairingTimeout);
     if (transport) await transport.close();
   }
 }
