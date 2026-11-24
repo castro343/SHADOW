@@ -65,12 +65,14 @@ test('loads only explicitly allowlisted plugin modules', () => {
 test('ports original main command names and aliases', async () => {
   const registry = new CommandRegistry();
   registerCore(registry);
-  for (const name of ['ping', 'speed', 'pong', 'ping2', 'uptime', 'runtime', 'up', 'gpass', 'owner', 'repo', 'sc', 'script', 'info', 'menu2', 'allmenu', 'fullmenu', 'alive', 'status', 'online', 'a', 'list', 'listcmd', 'commands', 'menu', 'help']) {
+  for (const name of ['ping', 'speed', 'pong', 'ping2', 'uptime', 'runtime', 'up', 'gpass', 'owner', 'repo', 'sc', 'script', 'info', 'menu2', 'allmenu', 'fullmenu', 'weather', 'wikipedia', 'wiki', 'alive', 'status', 'online', 'a', 'list', 'listcmd', 'commands', 'menu', 'help']) {
     assert.ok(registry.get(name), 'missing original command or alias: ' + name);
   }
   const owner = await registry.dispatch('.owner');
   const repo = await registry.dispatch('.sc');
   const fullMenu = await registry.dispatch('.allmenu');
+  const weatherHelp = await registry.dispatch('.weather');
+  const wikiHelp = await registry.dispatch('.wiki');
   const uptime = await registry.dispatch('.runtime');
   const password = await registry.dispatch('.gpass 20');
   const badPassword = await registry.dispatch('.gpass 7');
@@ -81,6 +83,8 @@ test('ports original main command names and aliases', async () => {
   assert.match(owner.value, /OWNER/);
   assert.match(repo.value, /github.com\\/castro343\\/SHADOW/);
   assert.match(fullMenu.value, /FULL COMMAND LIST/);
+  assert.match(weatherHelp.value, /Usage: \.weather/);
+  assert.match(wikiHelp.value, /Usage: \.wikipedia/);
   assert.match(uptime.value, /UPTIME/);
   assert.match(password.value, /SHADOW PASSWORD/);
   assert.match(password.value.split('\n\n')[1], /^[\s\S]{20}$/);
