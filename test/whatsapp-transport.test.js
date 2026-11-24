@@ -45,15 +45,17 @@ function createBaileysMock() {
     async requestPairingCode(number) { return 'TEST-CODE-' + number.slice(-2); }
   };
   const calls = [];
+  const creds = { registered: false };
   return {
     calls,
+    creds,
     socket,
     baileys: {
       default(options) {
         calls.push(options);
         return socket;
       },
-      initAuthCreds: () => ({ registered: false }),
+      initAuthCreds: () => creds,
       BufferJSON,
       proto: {},
       makeCacheableSignalKeyStore(keys) { return keys; }
@@ -165,4 +167,24 @@ test('sanitizes connection updates', () => {
     safeConnectionUpdate({ connection: 'close', qr: 'do-not-return', isNewLogin: true, lastDisconnect: { error: { output: { statusCode: 401 } } } }),
     { connection: 'close', hasQr: true, isNewLogin: true, receivedPendingNotifications: false, lastDisconnectStatusCode: 401 }
   );
+});
+
+test('emits only sanitized registration state after credential persistence', async () => {
+  const mongo = createMongoMock();
+  const baileys = createBaileysMock();
+  const updates = [];
+  const transport = await createWhatsAppTransport({
+    env,
+    MongoClient: mongo.FakeMongoClient,
+    logger: {},
+    baileys: baileys.baileys,
+    onCredentialsUpdate: update => updates.push(update)
+  });
+
+  baileys.creds.registered = true;
+  baileys.socket.ev.emit('creds.update', {});
+  await new Promise(resolve => setImmediate(resolve));
+
+  assert.deepEqual(updates, [{ registered: true }]);
+  await transport.close();
 });
