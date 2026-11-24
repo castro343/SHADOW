@@ -39,3 +39,16 @@ This audit does **not** claim that the remote payload is proven malicious. It re
 ## Scope
 
 This was a static review of the bootstrapper and repository structure. No bot code was executed, no WhatsApp session was connected, and no deployment was made.
+
+## Additional issues found in the downloaded payload
+
+Static review of selected plugin files from the external payload found further reasons not to import or run it as-is:
+
+- **Hard-coded Heroku API credential:** `plugins/heroku-del.js` and `plugins/heroku-del-skip-app.js` contain the same literal Heroku bearer token. The commands use it to enumerate and delete apps across personal or team accounts. Because the credential is committed in a public repository, it must be treated as compromised. The account owner should revoke/rotate it immediately. SHADOW will not copy this credential or these destructive commands.
+- **SMS abuse features:** `plugins/bomber.js` calls an SMS-bombing endpoint; `plugins/sms.js` sends SMS through a third-party endpoint. These are excluded from SHADOW.
+- **Remote pairing dependency:** `plugins/get-pair.js` sends phone numbers to a third-party Heroku pairing service. SHADOW must use its own reviewed pairing/session flow rather than forwarding user numbers to that service.
+- **Remote updater:** `plugins/check-update.js` checks the original ADEEL-MD repository, while `plugins/main-updater.js` runs a PM2 restart command. Updates must be controlled by SHADOW's own release process.
+- **Arbitrary URL fetch:** `plugins/tool-fetch.js` accepts user-provided HTTP(S) URLs. This needs strict destination and network protections before it can be considered safe; it is excluded for now.
+- **Broad destructive/admin actions:** Some plugins can delete all Heroku apps, clear all chats, broadcast to every group, or shut down the process. These require redesign and explicit safeguards before any inclusion.
+
+These findings are from static inspection of selected plugin files, not a complete audit of every plugin or of the obfuscated runtime.
