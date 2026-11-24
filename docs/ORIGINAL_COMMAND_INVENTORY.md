@@ -210,3 +210,15 @@ Ported into SHADOW's reviewed core registry from the original payload:
 | SHADOW core menu | `.menu` (alias: `.help`) |
 
 The above command names and aliases are registered and covered by unit tests. Their responses are rebranded for SHADOW; advanced presentation details from the upstream handlers are intentionally not copied where they depend on the original newsletter identity or unsafe assumptions.
+
+## Additional migrated commands
+
+| Original source file | Commands and aliases now registered |
+|---|---|
+| `plugins/get-owner.js` | `.owner` (SHADOW-branded text contact; uses configured owner number) |
+| `plugins/main-repo.js` | `.repo` (aliases: `.sc`, `.script`, `.info`; points to SHADOW repository) |
+| `plugins/main-menu.js` | `.menu2` (aliases: `.allmenu`, `.fullmenu`; dynamically lists enabled commands) |
+| `plugins/check-weather.js` | `.weather` (uses Open-Meteo instead of copying the upstream embedded API key) |
+| `plugins/tool-wikipedia.js` | `.wikipedia` (alias: `.wiki`; uses Wikipedia REST summary endpoint) |
+
+These handlers are registered in `plugins/core.js`. Weather and Wikipedia network calls use bounded request timeouts and do not embed the upstream API credentials. Unit tests verify registration, aliases, and usage validation; live external API behaviour still needs integration testing.
